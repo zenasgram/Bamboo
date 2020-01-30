@@ -199,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen>
                                           .millisecondsSinceEpoch,
                                       data.yValue,
                                       DateTime.now()
-                                          .subtract(Duration(minutes: 5))
+                                          .subtract(Duration(minutes: 10))
                                           .millisecondsSinceEpoch);
 
                                   return data.xValue;
