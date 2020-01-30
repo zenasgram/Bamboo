@@ -71,7 +71,7 @@ String getThreshold(int flexValue) {
     return 'Excellent';
   } else if (flexValue < 400) {
     return 'Amazing';
-  } else if (flexValue < 5000) {
+  } else if (flexValue < 500) {
     return 'Great';
   } else if (flexValue < 600) {
     return 'Very Good';
@@ -97,11 +97,11 @@ String getThreshold(int flexValue) {
     return 'Dangerous';
   } else if (flexValue < 1700) {
     return 'Very Dangerous';
-  } else if (flexValue < 1700) {
+  } else if (flexValue < 1800) {
     return 'Extremely Dangerous';
-  } else if (flexValue < 1700) {
+  } else if (flexValue < 1900) {
     return 'Terrible';
-  } else if (flexValue < 1700) {
+  } else if (flexValue < 2000) {
     return 'Extremely Terrible';
   } else {
     return 'Life Threatening';
@@ -137,10 +137,12 @@ Map<String, String> adviceMap = {
 
 void updateVariables(int xData, int yData, int timeNow) {
   if (xData > timeNow) {
-    String statusKey = getThreshold(yData.toInt());
+    String statusKey = getThreshold(yData);
     selector = bendThresholdMap[statusKey];
 
     statusBend = statusKey;
     statusAdvice = adviceMap[statusKey];
+
+    print('Just updated bamboo!');
   }
 }

@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen>
     getCurrentUser();
 
     controller = AnimationController(
-      duration: Duration(seconds: 10),
+      duration: Duration(seconds: 5),
       vsync: this,
     );
 
@@ -41,8 +41,9 @@ class _HomeScreenState extends State<HomeScreen>
       if (animation.value == 1) {
         controller.reset();
         controller.forward();
+
+        setState(() {});
       }
-      setState(() {});
 //      print(animation.value);
     });
   }
