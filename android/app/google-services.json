@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1021105510767",
+    "firebase_url": "https://bamboo-1e683.firebaseio.com",
+    "project_id": "bamboo-1e683",
+    "storage_bucket": "bamboo-1e683.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021105510767:android:9b50fe710bd802e729f09a",
+        "android_client_info": {
+          "package_name": "com.zenaslim.bamboo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021105510767-obd2ah35a4qt21s7c5t6okbft6i5ht60.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCabNuUHW8jOrk0HsKIUuo2OZXHa8cgDTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1021105510767-obd2ah35a4qt21s7c5t6okbft6i5ht60.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
