@@ -135,8 +135,8 @@ Map<String, String> adviceMap = {
   'Life Threatening': 'Can be improved, don\'t give up!',
 };
 
-void updateVariables(int xData, int yData, int timeNow) {
-  if (xData > timeNow) {
+void updateVariables(int xData, int yData, int timeThres) {
+  if (xData > timeThres) {
     String statusKey = getThreshold(yData);
     selector = bendThresholdMap[statusKey];
 

@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen>
     getCurrentUser();
 
     controller = AnimationController(
-      duration: Duration(seconds: 5),
+      duration: Duration(seconds: 2),
       vsync: this,
     );
 
@@ -39,12 +39,11 @@ class _HomeScreenState extends State<HomeScreen>
 
     controller.addListener(() {
       if (animation.value == 1) {
-        controller.reset();
+        controller.reverse();
+      } else if (animation.value == 0) {
         controller.forward();
-
-        setState(() {});
       }
-//      print(animation.value);
+      setState(() {});
     });
   }
 
@@ -149,115 +148,128 @@ class _HomeScreenState extends State<HomeScreen>
                   thickness: 2,
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: Container(
+                  alignment: Alignment(-0.15 + 0.3 * animation.value, 0),
                   child: Image.asset('images/bamboo$selector.png'),
-                  height: 90,
+//                  height: 300 + 10 * animation.value,
                 ),
               ),
-              StreamBuilder<void>(
-                stream: fireData.snapshots(),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  Widget widget;
-                  if (snapshot.hasData) {
-                    List<ChartData> chartData = <ChartData>[];
-                    for (int index = 0;
-                        index < snapshot.data.documents.length;
-                        index++) {
-                      DocumentSnapshot documentSnapshot =
-                          snapshot.data.documents[index];
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    StreamBuilder<void>(
+                      stream: fireData.orderBy('time').snapshots(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        Widget widget;
+                        if (snapshot.hasData) {
+                          List<ChartData> chartData = <ChartData>[];
+                          for (int index = 0;
+                              index < snapshot.data.documents.length;
+                              index++) {
+                            DocumentSnapshot documentSnapshot =
+                                snapshot.data.documents[index];
 
-                      // here we are storing the data into a list which is used for chart’s data source
-                      chartData.add(ChartData.fromMap(documentSnapshot.data));
-                    }
-                    widget = Container(
-                        height: 200,
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: SfCartesianChart(
-                          primaryXAxis: DateTimeAxis(
-                            intervalType: DateTimeIntervalType.hours,
-                            interval: 2,
-                            maximum: DateTime.now(),
-                            minimum:
-                                DateTime.now().subtract(Duration(hours: 12)),
-                          ),
-                          primaryYAxis: NumericAxis(
+                            // here we are storing the data into a list which is used for chart’s data source
+                            chartData
+                                .add(ChartData.fromMap(documentSnapshot.data));
+                          }
+                          widget = Container(
+                            height: 200,
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: SfCartesianChart(
+                              primaryXAxis: DateTimeAxis(
+                                intervalType: DateTimeIntervalType.hours,
+                                interval: 2,
+                                maximum: DateTime.now(),
+                                minimum: DateTime.now()
+                                    .subtract(Duration(hours: 12)),
+                              ),
+                              primaryYAxis: NumericAxis(
 //                            maximum: 20000,
 //                            minimum: 0,
+                                  ),
+                              series: <ChartSeries<ChartData, dynamic>>[
+                                SplineAreaSeries<ChartData, dynamic>(
+                                    color: Colors.tealAccent,
+                                    opacity: 0.8,
+                                    dataSource: chartData,
+                                    xValueMapper: (ChartData data, _) {
+                                      updateVariables(
+                                          data.xValue
+                                              .toDate()
+                                              .millisecondsSinceEpoch,
+                                          data.yValue,
+                                          DateTime.now()
+                                              .subtract(Duration(minutes: 5))
+                                              .millisecondsSinceEpoch);
+                                      return data.xValue;
+                                    },
+                                    yValueMapper: (ChartData data, _) =>
+                                        data.yValue),
+                              ],
+                              margin: EdgeInsets.all(20),
+                              plotAreaBorderColor: Colors.transparent,
+                              tooltipBehavior: TooltipBehavior(enable: true),
+                            ),
+                          );
+                        }
+                        return widget;
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 15),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.white70, width: 1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        color: Colors.white,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 20, left: 20, right: 20, bottom: 0),
+                              child: Text(
+                                'Information',
+                                style: GoogleFonts.montserrat(
+                                  color: Colors.black,
+                                  textStyle:
+                                      Theme.of(context).textTheme.display1,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.normal,
+                                ),
                               ),
-                          series: <ChartSeries<ChartData, dynamic>>[
-                            SplineAreaSeries<ChartData, dynamic>(
-                                color: Colors.tealAccent,
-                                opacity: 0.8,
-                                dataSource: chartData,
-//                                splineType: SplineType.cardinal,
-//                                cardinalSplineTension: 0.9,
-                                xValueMapper: (ChartData data, _) {
-                                  updateVariables(
-                                      data.xValue
-                                          .toDate()
-                                          .millisecondsSinceEpoch,
-                                      data.yValue,
-                                      DateTime.now()
-                                          .subtract(Duration(minutes: 10))
-                                          .millisecondsSinceEpoch);
-
-                                  return data.xValue;
-                                },
-                                yValueMapper: (ChartData data, _) =>
-                                    data.yValue),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                  top: 5,
+                                  left: 20.0,
+                                  right: 20.0,
+                                  bottom: 20.0),
+                              child: Text(
+                                '$statusBend posture! $statusAdvice',
+                                style: GoogleFonts.montserrat(
+                                  color: Colors.black,
+                                  textStyle:
+                                      Theme.of(context).textTheme.display1,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w200,
+                                  fontStyle: FontStyle.normal,
+                                ),
+                              ),
+                            ),
                           ],
-                          margin: EdgeInsets.all(20),
-                          plotAreaBorderColor: Colors.transparent,
-                          tooltipBehavior: TooltipBehavior(enable: true),
-                        ));
-                  }
-                  return widget;
-                },
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.white70, width: 1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  color: Colors.white,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 20, left: 20, right: 20, bottom: 0),
-                        child: Text(
-                          'Information',
-                          style: GoogleFonts.montserrat(
-                            color: Colors.black,
-                            textStyle: Theme.of(context).textTheme.display1,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.normal,
-                          ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: 5, left: 20.0, right: 20.0, bottom: 20.0),
-                        child: Text(
-                          '$statusBend posture! $statusAdvice',
-                          style: GoogleFonts.montserrat(
-                            color: Colors.black,
-                            textStyle: Theme.of(context).textTheme.display1,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w200,
-                            fontStyle: FontStyle.normal,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],

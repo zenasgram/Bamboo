@@ -49,6 +49,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   child: Hero(
                     tag: 'logo',
                     child: Container(
+                      alignment: Alignment(0.3, 0),
                       height: 200.0,
                       child: Image.asset('images/logo.png'),
                     ),
