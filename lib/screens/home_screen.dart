@@ -171,9 +171,8 @@ class _HomeScreenState extends State<HomeScreen>
                       chartData.add(ChartData.fromMap(documentSnapshot.data));
                     }
                     widget = Container(
-                        height: 250,
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                        height: 200,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
                         child: SfCartesianChart(
                           primaryXAxis: DateTimeAxis(
                             intervalType: DateTimeIntervalType.hours,
@@ -217,7 +216,8 @@ class _HomeScreenState extends State<HomeScreen>
                 },
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: Card(
                   shape: RoundedRectangleBorder(
                     side: BorderSide(color: Colors.white70, width: 1),
