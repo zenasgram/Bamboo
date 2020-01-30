@@ -97,7 +97,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                       if (newUser != null) {
                         Navigator.pushNamed(context, HomeScreen.id);
-                      }
+                      } else {}
                       setState(() {
                         showSpinner = false;
                       });

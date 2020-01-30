@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           email: email, password: password);
                       if (user != null) {
                         Navigator.pushNamed(context, HomeScreen.id);
-                      }
+                      } else {}
                       setState(() {
                         showSpinner = false;
                       });
