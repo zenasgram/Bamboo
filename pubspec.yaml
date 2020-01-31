@@ -23,6 +23,7 @@ dependencies:
   expandable_card: ^0.0.3+1
   flutter_3d_obj: ^0.0.6
   syncfusion_flutter_charts: ^17.4.43
+  firebase_database: ^3.1.1
 
 dev_dependencies:
   flutter_test:

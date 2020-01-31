@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:bamboo/constants.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -12,7 +13,12 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:syncfusion_flutter_core/core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
+
 import 'package:intl/intl.dart';
+import 'dart:math';
+import 'dart:io';
 
 class HomeScreen extends StatefulWidget {
   static String id = 'home_screen';
@@ -32,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen>
     getCurrentUser();
 
     controller = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 3),
       vsync: this,
     );
 
@@ -44,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen>
         controller.reverse();
       } else if (animation.value == 0) {
         controller.forward();
+        simulateSensor();
       }
       setState(() {});
     });
@@ -54,6 +61,21 @@ class _HomeScreenState extends State<HomeScreen>
     // TODO: implement dispose
     super.dispose();
     controller.dispose();
+  }
+
+  final fireRTData = FirebaseDatabase.instance.reference().child("flex");
+
+  void writeData(int value, Timestamp time) {
+    fireRTData.push().set({
+      "value": value,
+      "time": time.toDate().toString(),
+    });
+  }
+
+  void readData() {
+    fireRTData.once().then((DataSnapshot dataSnapshot) {
+      print(dataSnapshot.value);
+    });
   }
 
   final _auth = FirebaseAuth.instance;
@@ -80,6 +102,11 @@ class _HomeScreenState extends State<HomeScreen>
         print(flex.data);
       }
     }
+  }
+
+  void simulateSensor() {
+    var rng = new Random();
+    writeData(rng.nextInt(2100), Timestamp.now());
   }
 
   @override
@@ -150,23 +177,21 @@ class _HomeScreenState extends State<HomeScreen>
                   thickness: 2,
                 ),
               ),
-              Expanded(
-                child: SizedBox(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Container(
-                        alignment: Alignment(1.2 + 0.1 * animation.value, 0),
-                        child: Image.asset('images/back$selector.png'),
-                        height: 200,
-                      ),
-                      Container(
-                        alignment: Alignment(-1.2 + -0.2 * animation.value, 0),
-                        child: Image.asset('images/front$selector.png'),
-                        height: 200,
-                      ),
-                    ],
-                  ),
+              SizedBox(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    Container(
+                      alignment: Alignment(8.2 + 0.5 * animation.value, 0),
+                      child: Image.asset('images/back$selector.png'),
+                      height: 200,
+                    ),
+                    Container(
+                      alignment: Alignment(-7.2 + -0.5 * animation.value, 0),
+                      child: Image.asset('images/front$selector.png'),
+                      height: 200,
+                    ),
+                  ],
                 ),
               ),
 //              Expanded(
@@ -182,32 +207,29 @@ class _HomeScreenState extends State<HomeScreen>
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     StreamBuilder<void>(
-                      stream: fireData.orderBy('time').snapshots(),
+                      stream: fireRTData.onValue,
+//                      stream: fireData.orderBy('time').snapshots(),
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
                         Widget widget;
                         if (snapshot.hasData) {
                           List<ChartData> chartData = <ChartData>[];
-                          for (int index = 0;
-                              index < snapshot.data.documents.length;
-                              index++) {
-                            DocumentSnapshot documentSnapshot =
-                                snapshot.data.documents[index];
+                          Map<dynamic, dynamic> map =
+                              snapshot.data.snapshot.value;
 
-                            // here we are storing the data into a list which is used for chart’s data source
-                            chartData
-                                .add(ChartData.fromMap(documentSnapshot.data));
-                          }
+                          map.forEach((dynamic, v) =>
+                              chartData.add(ChartData.fromMap(v)));
+
                           widget = Container(
-                            height: 300,
+                            height: 250,
                             padding: EdgeInsets.only(right: 30),
                             child: SfCartesianChart(
                               primaryXAxis: DateTimeAxis(
                                 dateFormat: DateFormat.jm(),
                                 intervalType: DateTimeIntervalType.minutes,
-                                interval: 10,
+                                interval: 2,
                                 maximum: DateTime.now(),
                                 minimum: DateTime.now()
-                                    .subtract(Duration(minutes: 30)),
+                                    .subtract(Duration(minutes: 5)),
                               ),
                               primaryYAxis: NumericAxis(
                                 isVisible: true,
@@ -224,7 +246,7 @@ class _HomeScreenState extends State<HomeScreen>
                                         fontWeight: FontWeight.w600)),
                               ),
                               series: <ChartSeries<ChartData, dynamic>>[
-                                AreaSeries<ChartData, dynamic>(
+                                ColumnSeries<ChartData, dynamic>(
                                     color: Colors.tealAccent,
                                     gradient: LinearGradient(
                                         begin: Alignment.topRight,
@@ -249,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen>
                                                 .millisecondsSinceEpoch,
                                             data.yValue,
                                             DateTime.now()
-                                                .subtract(Duration(minutes: 60))
+                                                .subtract(Duration(seconds: 5))
                                                 .millisecondsSinceEpoch);
                                       }
 
@@ -273,7 +295,18 @@ class _HomeScreenState extends State<HomeScreen>
                         return widget;
                       },
                     ),
-                    Padding(
+                  ],
+                ),
+              ),
+//              Flexible(
+//                child: SizedBox(
+//                  height: 10,
+//                ),
+//              ),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: Padding(
                       padding: const EdgeInsets.only(
                           top: 15, left: 15, right: 15, bottom: 0),
                       child: Card(
@@ -313,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   color: Colors.black,
                                   textStyle:
                                       Theme.of(context).textTheme.display1,
-                                  fontSize: 15,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w300,
                                   fontStyle: FontStyle.normal,
                                 ),
@@ -323,8 +356,8 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -334,10 +367,13 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
+DateFormat inputFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+
 class ChartData {
   ChartData({this.xValue, this.yValue});
-  ChartData.fromMap(Map<String, dynamic> dataMap)
-      : xValue = dataMap['time'],
+
+  ChartData.fromMap(Map<dynamic, dynamic> dataMap)
+      : xValue = Timestamp.fromDate(inputFormat.parse(dataMap['time'])),
         yValue = dataMap['value'];
   final Timestamp xValue;
   final int yValue;
