@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_core/core.dart';
+import 'package:flutter/services.dart';
+
 import 'package:bamboo/screens/welcome_screen.dart';
 import 'package:bamboo/screens/login_screen.dart';
 import 'package:bamboo/screens/registration_screen.dart';
 import 'package:bamboo/screens/home_screen.dart';
-
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_core/core.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   SyncfusionLicense.registerLicense(null);
