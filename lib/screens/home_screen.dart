@@ -34,12 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
-    Timer.periodic(Duration(seconds: 10), (timer) {
+    Timer.periodic(Duration(seconds: 5), (timer) {
       sim.simulateSensor();
+    });
+
+    //Screen Refresh Rate (Should be faster than sensor rate)
+    Timer.periodic(Duration(seconds: 2), (timer) {
       setState(() {});
     });
 
-    mqttListener(); //runs the mqtt Script
+//    mqttListener(); //runs the mqtt Script
 
     getCurrentUser();
 //
@@ -210,13 +214,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.all(7),
                       alignment: Alignment.centerRight,
 //                      Alignment(8.2 + 0.5 * animation.value, 0),
-                      child: Image.asset('images/back$selector.png'),
+                      child: Image.asset('images/$modeTitle-back$selector.png'),
                       height: 170,
                     ),
                     Container(
                       alignment: Alignment.centerLeft,
 //                      Alignment(-7.2 + -0.5 * animation.value, 0),
-                      child: Image.asset('images/front$selector.png'),
+                      child:
+                          Image.asset('images/$modeTitle-front$selector.png'),
                       height: 170,
                     ),
                   ],
@@ -247,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             interval: 2,
                             maximum: DateTime.now(),
                             minimum:
-                                DateTime.now().subtract(Duration(minutes: 2)),
+                                DateTime.now().subtract(Duration(minutes: 5)),
                           ),
                           primaryYAxis: NumericAxis(
                             isVisible: true,
@@ -280,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Colors.red[500],
                                     ]),
                                 opacity: 0.8,
+                                width: 0.8,
                                 dataSource: chartData,
                                 xValueMapper: (ChartData data, _) {
                                   if (data.yValue != null) {
@@ -289,7 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             .millisecondsSinceEpoch,
                                         data.yValue,
                                         DateTime.now()
-                                            .subtract(Duration(seconds: 1))
+                                            .subtract(Duration(seconds: 5))
                                             .millisecondsSinceEpoch);
                                   }
                                   return data.xValue;

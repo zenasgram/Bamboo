@@ -21,6 +21,7 @@ class Bamboo extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.dark().copyWith(
         primaryColor: Color(0xFF4E5ADF),
         accentColor: Color(0xFF36DEEC),
