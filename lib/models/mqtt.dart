@@ -23,9 +23,11 @@ import 'package:mqtt_client/mqtt_client.dart';
 /// of 1883 is used.
 /// If you want to use websockets rather than TCP see below.
 
-final MqttClient client = MqttClient('test.mosquitto.org', '');
+String pt;
 
-Future<int> mqttListener() async {
+int listenDuration = 1200000; //in seconds
+
+Future<int> mqttListener(MqttClient client) async {
   /// A websocket URL must start with ws:// or wss:// or Dart will throw an exception, consult your websocket MQTT broker
   /// for details.
   /// To use websockets add the following lines -:
@@ -38,7 +40,7 @@ Future<int> mqttListener() async {
   /// list so in most cases you can ignore this.
 
   /// Set logging on if needed, defaults to off
-  client.logging(on: false);
+  client.logging(on: true);
 
   /// If you intend to use a keep alive value in your connect message that is not the default(60s)
   /// you must set it here
@@ -75,7 +77,7 @@ Future<int> mqttListener() async {
   client.connectionMessage = connMess;
 
   /// Connect the client, any errors here are communicated by raising of the appropriate exception. Note
-  /// in some circumstances the broker will just disconnect us, see the spec about this, we however will
+  /// in some circumstances the broker will just disconnect us, see the spec about this, we however eill
   /// never send malformed messages.
   try {
     await client.connect();
@@ -86,27 +88,26 @@ Future<int> mqttListener() async {
 
   /// Check we are connected
   if (client.connectionStatus.state == MqttConnectionState.connected) {
-    print('Mosquitto client connected');
+    print('EXAMPLE::Mosquitto client connected');
   } else {
     /// Use status here rather than state if you also want the broker return code.
     print(
-        'ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+        'EXAMPLE::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
     client.disconnect();
     exit(-1);
   }
 
   /// Ok, lets try a subscription
-  print('Subscribing to the IC.embedded/Faraday topic');
-//  const String topic = 'IC.embedded/Faraday'; // Not a wildcard topic
-  const String topic = 'test/lol'; // Not a wildcard topic
+  print('EXAMPLE::Subscribing to the IC.embedded/Faraday topic');
+  const String topic = 'IC.embedded/Faraday'; // Not a wildcard topic
   client.subscribe(topic, MqttQos.atMostOnce);
 
   /// The client has a change notifier object(see the Observable class) which we then listen to to get
   /// notifications of published updates to each subscribed topic.
+
   client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
     final MqttPublishMessage recMess = c[0].payload;
-    final String pt =
-        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+    pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
     /// The above may seem a little convoluted for users only interested in the
     /// payload, some users however may be interested in the received publish message,
@@ -114,8 +115,7 @@ Future<int> mqttListener() async {
     /// for a while.
     /// The payload is a byte buffer, this will be specific to the topic
     print(
-        'Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
-
+        'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
     print('');
   });
 
@@ -124,61 +124,61 @@ Future<int> mqttListener() async {
   /// publishing handshake with the broker.
   client.published.listen((MqttPublishMessage message) {
     print(
-        'Published notification:: topic is ${message.variableHeader.topicName}, with Qos ${message.header.qos}');
+        'EXAMPLE::Published notification:: topic is ${message.variableHeader.topicName}, with Qos ${message.header.qos}');
   });
 
-  /// Lets publish to our topic
-  /// Use the payload builder rather than a raw buffer
-  /// Our known topic to publish to
-//  const String pubTopic = 'IC.embedded/Faraday';
-  const String pubTopic = 'Dart/Mqtt_client/testtopic';
-  final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-  builder.addString('Hello from mqtt_client');
-
-  /// Subscribe to it
-  print('Subscribing to the IC.embedded/Faraday topic');
-  client.subscribe(pubTopic, MqttQos.exactlyOnce);
-
-  /// Publish it
-  print('Publishing our topic');
-  client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
+//  /// Lets publish to our topic
+//  /// Use the payload builder rather than a raw buffer
+//  /// Our known topic to publish to
+//  const String pubTopic = 'Dart/Mqtt_client/testtopic';
+//  final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+//  builder.addString('Hello from mqtt_client');
+//
+//  /// Subscribe to it
+//  print('EXAMPLE::Subscribing to the Dart/Mqtt_client/testtopic topic');
+//  client.subscribe(pubTopic, MqttQos.exactlyOnce);
+//
+//  /// Publish it
+//  print('EXAMPLE::Publishing our topic');
+//  client.publishMessage(pubTopic, MqttQos.exactlyOnce, builder.payload);
 
   /// Ok, we will now sleep a while, in this gap you will see ping request/response
   /// messages being exchanged by the keep alive mechanism.
-  print('Sleeping....');
-  await MqttUtilities.asyncSleep(120);
+  print('EXAMPLE::Sleeping....');
+  await MqttUtilities.asyncSleep(listenDuration);
 
   /// Finally, unsubscribe and exit gracefully
-  print('Unsubscribing');
+  print('EXAMPLE::Unsubscribing');
   client.unsubscribe(topic);
 
   /// Wait for the unsubscribe message from the broker if you wish.
   await MqttUtilities.asyncSleep(2);
-  print('Disconnecting');
+  print('EXAMPLE::Disconnecting');
   client.disconnect();
   return 0;
 }
 
 /// The subscribed callback
 void onSubscribed(String topic) {
-  print('Subscription confirmed for topic $topic');
+  print('EXAMPLE::Subscription confirmed for topic $topic');
 }
 
 /// The unsolicited disconnect callback
 void onDisconnected() {
-  print('OnDisconnected client callback - Client disconnection');
-  if (client.connectionStatus.returnCode == MqttConnectReturnCode.solicited) {
-    print('OnDisconnected callback is solicited, this is correct');
-  }
+  print('EXAMPLE::OnDisconnected client callback - Client disconnection');
+//  if (client.connectionStatus.returnCode == MqttConnectReturnCode.solicited) {
+//    print('EXAMPLE::OnDisconnected callback is solicited, this is correct');
+//  }
   exit(-1);
 }
 
 /// The successful connect callback
 void onConnected() {
-  print('OnConnected client callback - Client connection was sucessful');
+  print(
+      'EXAMPLE::OnConnected client callback - Client connection was sucessful');
 }
 
 /// Pong callback
 void pong() {
-  print('Ping response client callback invoked');
+  print('EXAMPLE::Ping response client callback invoked');
 }

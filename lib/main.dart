@@ -7,9 +7,10 @@ import 'package:bamboo/screens/login_screen.dart';
 import 'package:bamboo/screens/registration_screen.dart';
 import 'package:bamboo/screens/home_screen.dart';
 
+import 'package:bamboo/models/mqtt.dart';
+
 void main() {
   SyncfusionLicense.registerLicense(null);
-
   return runApp(Bamboo());
 }
 

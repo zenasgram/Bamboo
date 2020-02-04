@@ -17,6 +17,7 @@ import 'package:bamboo/models/simulator.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'dart:async';
+import 'package:mqtt_client/mqtt_client.dart';
 
 class HomeScreen extends StatefulWidget {
   static String id = 'home_screen';
@@ -34,16 +35,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
-    Timer.periodic(Duration(seconds: 5), (timer) {
-      sim.simulateSensor();
+    Timer.periodic(Duration(seconds: 2), (timer) {
+//    sim.simulateSensor();
+      if (pt != null) {
+        sim.backFlexData(pt);
+      }
     });
 
     //Screen Refresh Rate (Should be faster than sensor rate)
-    Timer.periodic(Duration(seconds: 2), (timer) {
+    Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {});
     });
 
-//    mqttListener(); //runs the mqtt Script
+    final MqttClient client =
+        MqttClient.withPort('test.mosquitto.org', '#', 1883);
+    mqttListener(client); //runs the mqtt Script
 
     getCurrentUser();
 //
@@ -252,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             interval: 2,
                             maximum: DateTime.now(),
                             minimum:
-                                DateTime.now().subtract(Duration(minutes: 5)),
+                                DateTime.now().subtract(Duration(minutes: 2)),
                           ),
                           primaryYAxis: NumericAxis(
                             isVisible: true,
@@ -295,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             .millisecondsSinceEpoch,
                                         data.yValue,
                                         DateTime.now()
-                                            .subtract(Duration(seconds: 5))
+                                            .subtract(Duration(seconds: 2))
                                             .millisecondsSinceEpoch);
                                   }
                                   return data.xValue;
@@ -316,7 +322,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   }
-                  return widget;
+                  if (widget != null) {
+                    return widget;
+                  }
+                  return Expanded(
+                    child: SizedBox(
+                      height: 10,
+                    ),
+                  );
                 },
               ),
               Row(
