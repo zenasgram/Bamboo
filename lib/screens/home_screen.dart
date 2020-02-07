@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
     Timer.periodic(Duration(seconds: 2), (timer) {
-//    sim.simulateSensor();
+      sim.simulateSensor();
       if (pt != null) {
         sim.backFlexData(pt);
       }
@@ -49,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final MqttClient client =
         MqttClient.withPort('test.mosquitto.org', '#', 1883);
-    mqttListener(client); //runs the mqtt Script
+//    mqttListener(client); //runs the mqtt Script
 
     getCurrentUser();
 //
@@ -73,7 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Real-time database instance (For storing flex sensor data backup)
 
-  final fireRTData = FirebaseDatabase.instance.reference().child("flex");
+  final fireRTData = FirebaseDatabase.instance
+      .reference()
+      .child("flex")
+      .orderByChild('time')
+      .limitToLast(31);
 
   //Cloud firestore instance (For user registration)
   final _auth = FirebaseAuth.instance;
@@ -243,8 +247,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     Map<dynamic, dynamic> map = snapshot.data.snapshot.value;
                     map.forEach((dynamic, v) {
                       ChartData dataItem = ChartData.fromMap(v);
-
-                      return chartData.add(dataItem);
+                      chartData.add(dataItem);
+                      return chartData
+                          .sort((a, b) => a.xValue.compareTo(b.xValue));
                     });
 
                     widget = Flexible(
@@ -255,10 +260,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           primaryXAxis: DateTimeAxis(
                             dateFormat: DateFormat.jm(),
                             intervalType: DateTimeIntervalType.minutes,
-                            interval: 2,
+                            interval: 1,
                             maximum: DateTime.now(),
                             minimum:
-                                DateTime.now().subtract(Duration(minutes: 2)),
+                                DateTime.now().subtract(Duration(minutes: 1)),
                           ),
                           primaryYAxis: NumericAxis(
                             isVisible: true,
@@ -275,7 +280,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     fontWeight: FontWeight.w600)),
                           ),
                           series: <ChartSeries<ChartData, dynamic>>[
-                            ColumnSeries<ChartData, dynamic>(
+                            SplineAreaSeries<ChartData, dynamic>(
+                                animationDuration: 0,
                                 color: Colors.tealAccent,
                                 gradient: LinearGradient(
                                     begin: Alignment.topRight,
@@ -291,7 +297,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Colors.red[500],
                                     ]),
                                 opacity: 0.8,
-                                width: 0.8,
                                 dataSource: chartData,
                                 xValueMapper: (ChartData data, _) {
                                   if (data.yValue != null) {
@@ -311,13 +316,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                           margin: EdgeInsets.all(20),
                           plotAreaBorderColor: Colors.transparent,
-                          tooltipBehavior: TooltipBehavior(
-                            enable: true,
-                            borderColor: Colors.tealAccent,
-                            borderWidth: 1,
-                            color: Colors.teal,
-                            activationMode: ActivationMode.singleTap,
-                          ),
                         ),
                       ),
                     );
