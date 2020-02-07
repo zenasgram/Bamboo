@@ -146,7 +146,5 @@ void updateVariables(int xData, int yData, int timeThres) {
 
     statusBend = statusKey;
     statusAdvice = adviceMap[statusKey];
-
-//    print('Just updated bamboo!');
   }
 }

@@ -29,6 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
 //  AnimationController controller;
 //  Animation animation;
 
+  List<ChartData> thresholdVisual = <ChartData>[];
+  int threshold = 1300;
+
   @override
   void initState() {
     super.initState();
@@ -242,12 +245,19 @@ class _HomeScreenState extends State<HomeScreen> {
 //                      stream: fireData.orderBy('time').snapshots(),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   Widget widget;
+
                   if (snapshot.hasData) {
                     List<ChartData> chartData = <ChartData>[];
                     Map<dynamic, dynamic> map = snapshot.data.snapshot.value;
                     map.forEach((dynamic, v) {
+                      ChartData thresData = ChartData(
+                          xValue: Timestamp.fromDate(DateTime.now()),
+                          yValue: threshold);
+                      thresholdVisual.add(thresData);
+
                       ChartData dataItem = ChartData.fromMap(v);
                       chartData.add(dataItem);
+
                       return chartData
                           .sort((a, b) => a.xValue.compareTo(b.xValue));
                     });
@@ -311,6 +321,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   }
                                   return data.xValue;
                                 },
+                                yValueMapper: (ChartData data, _) =>
+                                    data.yValue),
+                            LineSeries<ChartData, dynamic>(
+                                animationDuration: 0,
+                                color: Colors.tealAccent,
+                                dataSource: thresholdVisual,
+                                xValueMapper: (ChartData data, _) =>
+                                    data.xValue,
                                 yValueMapper: (ChartData data, _) =>
                                     data.yValue),
                           ],
