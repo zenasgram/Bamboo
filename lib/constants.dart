@@ -139,12 +139,22 @@ Map<String, String> adviceMap = {
   'Life threatening': 'Can be improved, don\'t give up!',
 };
 
-void updateVariables(int xData, int yData, int timeThres) {
+void updateVariables(int xData, int yData, int timeThres, String mode) {
   if (xData > timeThres && yData != null) {
     String statusKey = getThreshold(yData);
     selector = bendThresholdMap[statusKey];
 
     statusBend = statusKey;
     statusAdvice = adviceMap[statusKey];
+    threshold = thresholdMap[mode];
   }
 }
+
+int threshold = 1300;
+
+Map<String, int> thresholdMap = {
+  'Home': 1300,
+  'Music': 400,
+  'Sports': 1000,
+  'Sleep': 1500,
+};

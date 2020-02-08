@@ -30,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
 //  Animation animation;
 
   List<ChartData> thresholdVisual = <ChartData>[];
-  int threshold = 1300;
 
   @override
   void initState() {
@@ -317,7 +316,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         data.yValue,
                                         DateTime.now()
                                             .subtract(Duration(seconds: 2))
-                                            .millisecondsSinceEpoch);
+                                            .millisecondsSinceEpoch,
+                                        modeTitle);
                                   }
                                   return data.xValue;
                                 },
