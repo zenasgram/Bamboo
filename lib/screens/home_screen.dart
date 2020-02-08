@@ -52,37 +52,42 @@ class _HomeScreenState extends State<HomeScreen> {
           alreadySet = true;
           showOverlayNotification(
             (context) {
-              return Card(
-                color: Colors.white,
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                child: SafeArea(
+              return SafeArea(
+                child: Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.only(left: 4, right: 4),
                   child: ListTile(
                     leading: SizedBox.fromSize(
                       size: const Size(40, 40),
                       child: Container(
-                        alignment: Alignment(0.3, 0),
                         height: 200.0,
                         child: Image.asset('images/logo.png'),
                       ),
                     ),
-                    title: Text(
-                      'Bamboo Alert',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        textStyle: Theme.of(context).textTheme.display1,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.normal,
+                    title: Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 15),
+                      child: Text(
+                        'Bamboo Alert',
+                        style: GoogleFonts.montserrat(
+                          color: Colors.black,
+                          textStyle: Theme.of(context).textTheme.display1,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.normal,
+                        ),
                       ),
                     ),
-                    subtitle: Text(
-                      'Check your posture. Remember, don\'t just do it. Bamboo it.',
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        textStyle: Theme.of(context).textTheme.display1,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w300,
-                        fontStyle: FontStyle.normal,
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(left: 8.0, bottom: 15),
+                      child: Text(
+                        'Check your posture. Remember, don\'t just do it. Bamboo it.',
+                        style: GoogleFonts.montserrat(
+                          color: Colors.black,
+                          textStyle: Theme.of(context).textTheme.display1,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w300,
+                          fontStyle: FontStyle.normal,
+                        ),
                       ),
                     ),
                     trailing: IconButton(
