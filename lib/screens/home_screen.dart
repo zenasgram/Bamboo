@@ -9,6 +9,7 @@ import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 import 'package:bamboo/constants.dart';
 import 'package:bamboo/models/mqtt.dart';
@@ -46,7 +47,63 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //Screen Refresh Rate (Should be faster than sensor rate)
     Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {});
+      setState(() {
+        if (warningStatus == true && alreadySet == false) {
+          alreadySet = true;
+          showOverlayNotification(
+            (context) {
+              return Card(
+                color: Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                child: SafeArea(
+                  child: ListTile(
+                    leading: SizedBox.fromSize(
+                      size: const Size(40, 40),
+                      child: Container(
+                        alignment: Alignment(0.3, 0),
+                        height: 200.0,
+                        child: Image.asset('images/logo.png'),
+                      ),
+                    ),
+                    title: Text(
+                      'Bamboo Alert',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.black,
+                        textStyle: Theme.of(context).textTheme.display1,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.normal,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Check your posture. Remember, don\'t just do it. Bamboo it.',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.black,
+                        textStyle: Theme.of(context).textTheme.display1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w300,
+                        fontStyle: FontStyle.normal,
+                      ),
+                    ),
+                    trailing: IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          color: Colors.black87,
+                        ),
+                        onPressed: () {
+                          OverlaySupportEntry.of(context).dismiss();
+                          alreadySet = false;
+                          warningStatus = false;
+                        }),
+                  ),
+                ),
+              );
+            },
+            duration: Duration(minutes: 60),
+          );
+//          warningStatus = false;
+        }
+      });
     });
 
     final MqttClient client =

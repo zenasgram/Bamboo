@@ -139,6 +139,12 @@ Map<String, String> adviceMap = {
   'Life threatening': 'Can be improved, don\'t give up!',
 };
 
+List<int> yDataList = [];
+int sensitivity = 5;
+
+bool warningStatus = false;
+bool alreadySet = false;
+
 void updateVariables(int xData, int yData, int timeThres, String mode) {
   if (xData > timeThres && yData != null) {
     String statusKey = getThreshold(yData);
@@ -147,6 +153,23 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
     statusBend = statusKey;
     statusAdvice = adviceMap[statusKey];
     threshold = thresholdMap[mode];
+
+    yDataList.add(yData); //yDataList for thresholding
+
+    if ((yDataList.length - sensitivity) > 0) {
+      int count = 0;
+
+      for (int i = (yDataList.length - 1);
+          i > (yDataList.length - sensitivity - 1);
+          i--) {
+        if (yDataList[i] > threshold) {
+          count++;
+        }
+      }
+      if (count == sensitivity) {
+        warningStatus = true;
+      }
+    }
   }
 }
 
