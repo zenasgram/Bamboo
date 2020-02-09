@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -140,10 +141,14 @@ Map<String, String> adviceMap = {
 };
 
 List<int> yDataList = [];
+int threshold = 1300;
+int newThres = 1300;
 int sensitivity = 15;
 
 bool warningStatus = false;
 bool alreadySet = false;
+
+int trackingTime = 0;
 
 void updateVariables(int xData, int yData, int timeThres, String mode) {
   if (xData > timeThres && yData != null) {
@@ -152,11 +157,14 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
 
     statusBend = statusKey;
     statusAdvice = adviceMap[statusKey];
-    threshold = thresholdMap[mode];
+    newThres = thresholdMap[mode];
 
     sensitivity = sensitivityMap[mode];
 
-    yDataList.add(yData); //yDataList for thresholding
+    if (xData != trackingTime) {
+      trackingTime = xData;
+      yDataList.add(yData); //yDataList for thresholding
+    }
 
     if ((yDataList.length - sensitivity) > 0) {
       int count = 0;
@@ -164,7 +172,7 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
       for (int i = (yDataList.length - 1);
           i > (yDataList.length - sensitivity - 1);
           i--) {
-        if (yDataList[i] > threshold) {
+        if (yDataList[i] > newThres) {
           count++;
         }
       }
@@ -172,10 +180,11 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
         warningStatus = true;
       }
     }
+    if (yDataList.length > 15) {
+      yDataList.removeAt(0); //clip array for memory management
+    }
   }
 }
-
-int threshold = 1300;
 
 Map<String, int> thresholdMap = {
   'Home': 1300,
@@ -185,10 +194,10 @@ Map<String, int> thresholdMap = {
 };
 
 Map<String, int> sensitivityMap = {
-  'Home': 20,
-  'Music': 6,
-  'Sports': 15,
-  'Sleep': 30,
+  'Home': 9,
+  'Music': 3,
+  'Sports': 7,
+  'Sleep': 14,
 };
 
 Map<String, int> modeToIndexMap = {

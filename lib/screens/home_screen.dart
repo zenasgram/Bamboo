@@ -28,14 +28,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-//  AnimationController controller;
-//  Animation animation;
-
   List<ChartData> thresholdVisual = <ChartData>[];
 
   @override
   void initState() {
     super.initState();
+
+    ChartData thresDataInitStart = ChartData(
+        xValue:
+            Timestamp.fromDate(DateTime.now().subtract(Duration(seconds: 60))),
+        yValue: threshold);
+    ChartData thresDataInitEnd =
+        ChartData(xValue: Timestamp.now(), yValue: threshold);
+    //ensures that threshold data always has at least 2 elements.
+    thresholdVisual.add(thresDataInitStart);
+    thresholdVisual.add(thresDataInitEnd);
 
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
@@ -47,12 +54,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     //Screen Refresh Rate (Should be faster than sensor rate)
-    Timer.periodic(Duration(milliseconds: 500), (timer) {
+    Timer.periodic(Duration(milliseconds: 100), (timer) {
       setState(() {
         //automode selector
-        if (newPageIndex != pageIndex && autoMode == true) {
-          pageIndex = newPageIndex;
-          _onItemTappedAuto(pageIndex);
+        if (autoMode == true) {
+          if (newPageIndex != pageIndex) {
+            _onItemTappedAuto(newPageIndex);
+          }
         }
 
         if (warningStatus == true && alreadySet == false) {
@@ -119,28 +127,14 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     });
 
-    final MqttClient client =
-        MqttClient.withPort('test.mosquitto.org', '#', 1883);
+    //-----------------------------------------------------------
+    //MQTT Client
+//    final MqttClient client =
+//        MqttClient.withPort('test.mosquitto.org', '#', 1883);
 //    mqttListener(client); //runs the mqtt Script
+    //-----------------------------------------------------------
 
     getCurrentUser();
-//
-//    controller = AnimationController(
-//      duration: Duration(seconds: 3),
-//      vsync: this,
-//    );
-//
-//    animation = CurvedAnimation(parent: controller, curve: Curves.easeInOut);
-//    controller.forward();
-//
-//    controller.addListener(() {
-//      if (animation.value == 1) {
-//        controller.reverse();
-//      } else if (animation.value == 0) {
-//        controller.forward();
-//      }
-//      setState(() {});
-//    });
   }
 
   //Real-time database instance (For storing flex sensor data backup)
@@ -170,7 +164,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final user = await _auth.currentUser();
       if (user != null) {
         loggedInUser = user;
-//        print(loggedInUser.email);
       }
     } catch (e) {
       print(e);
@@ -357,7 +350,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               StreamBuilder<void>(
                 stream: fireRTData.onValue,
-//                      stream: fireData.orderBy('time').snapshots(),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   Widget widget;
 
@@ -366,16 +358,50 @@ class _HomeScreenState extends State<HomeScreen> {
                     List<String> modeData = [];
                     Map<dynamic, dynamic> map = snapshot.data.snapshot.value;
                     map.forEach((dynamic, v) {
+                      //updating threshold line on MODE change
+                      if (newThres != threshold) {
+                        thresholdVisual.clear();
+                        ChartData newThresDataStart = ChartData(
+                            xValue: Timestamp.fromDate(
+                                DateTime.now().subtract(Duration(seconds: 60))),
+                            yValue: newThres);
+                        ChartData newThresDataEnd = ChartData(
+                            xValue: Timestamp.now(), yValue: newThres);
+
+                        thresholdVisual.add(newThresDataStart);
+                        thresholdVisual.add(newThresDataEnd);
+                        threshold = newThres;
+                      }
+                      //updates the threshold line as time increases
                       ChartData thresData =
                           ChartData(xValue: Timestamp.now(), yValue: threshold);
+                      thresholdVisual.removeLast();
                       thresholdVisual.add(thresData);
 
+                      if (chartData.length == 0) {
+                        ChartData nullHandler =
+                            ChartData(xValue: Timestamp.now(), yValue: 0);
+                        chartData.add(nullHandler);
+                      }
+
                       ChartData dataItem = ChartData.fromMap(v);
+
+                      if (dataItem.xValue.toDate().millisecondsSinceEpoch !=
+                          trackingTime) {
+                        chartData.add(
+                            dataItem); //add to ChartData only when change is detected!
+                      }
+
                       modeData.add(dataItem.mode);
                       if (modeData.last != null) {
                         newPageIndex = modeToIndexMap[modeData.last];
                       }
-                      chartData.add(dataItem);
+                      modeData.clear();
+
+                      if (chartData.length > 61) {
+                        chartData
+                            .removeAt(0); //clip array for memory management
+                      }
 
                       return chartData
                           .sort((a, b) => a.xValue.compareTo(b.xValue));
@@ -390,7 +416,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             dateFormat: DateFormat.jm(),
                             intervalType: DateTimeIntervalType.minutes,
                             interval: 1,
-                            maximum: DateTime.now(),
+                            maximum:
+                                DateTime.now().subtract(Duration(seconds: 5)),
                             minimum:
                                 DateTime.now().subtract(Duration(minutes: 1)),
                           ),
@@ -443,8 +470,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 },
                                 yValueMapper: (ChartData data, _) =>
                                     data.yValue),
-                            LineSeries<ChartData, dynamic>(
+                            AreaSeries<ChartData, dynamic>(
                                 animationDuration: 0,
+                                opacity: 0.3,
                                 color: Colors.tealAccent,
                                 dataSource: thresholdVisual,
                                 xValueMapper: (ChartData data, _) {
