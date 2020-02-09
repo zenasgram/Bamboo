@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:bamboo/constants.dart';
 import 'package:bamboo/models/mqtt.dart';
@@ -43,15 +44,17 @@ class _HomeScreenState extends State<HomeScreen> {
       if (pt != null) {
         sim.backFlexData(pt);
       }
-      if (newPageIndex != pageIndex) {
-        pageIndex = newPageIndex;
-        _onItemTapped(pageIndex);
-      }
     });
 
     //Screen Refresh Rate (Should be faster than sensor rate)
-    Timer.periodic(Duration(seconds: 1), (timer) {
+    Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {
+        //automode selector
+        if (newPageIndex != pageIndex && autoMode == true) {
+          pageIndex = newPageIndex;
+          _onItemTappedAuto(pageIndex);
+        }
+
         if (warningStatus == true && alreadySet == false) {
           alreadySet = true;
           showOverlayNotification(
@@ -178,10 +181,26 @@ class _HomeScreenState extends State<HomeScreen> {
   //Mode Selector
   String modeTitle = 'Home';
 
+  bool autoMode = false;
+
   void _onItemTapped(int index) {
     setState(() {
       pageIndex = index;
       modeTitle = modeDict[index];
+      autoMode = false;
+
+      if (index == 0) {
+      } else if (index == 1) {
+      } else if (index == 2) {
+      } else if (index == 3) {}
+    });
+  }
+
+  void _onItemTappedAuto(int index) {
+    setState(() {
+      pageIndex = index;
+      modeTitle = modeDict[index];
+      autoMode = true;
 
       if (index == 0) {
       } else if (index == 1) {
@@ -266,14 +285,44 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                    IconButton(
-                        icon: Icon(FontAwesomeIcons.signOutAlt),
-                        iconSize: 30,
-                        onPressed: () {
-                          //Implement logout functionality
-                          _auth.signOut();
-                          Navigator.pop(context);
-                        }),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 20,
+                        ),
+                        IconButton(
+                            icon: Icon(FontAwesomeIcons.signOutAlt),
+                            iconSize: 30,
+                            onPressed: () {
+                              //Implement logout functionality
+                              _auth.signOut();
+                              Navigator.pop(context);
+                            }),
+                        Row(
+                          children: <Widget>[
+                            Text(
+                              'Auto',
+                              style: GoogleFonts.montserrat(
+                                textStyle: Theme.of(context).textTheme.display1,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.normal,
+                              ),
+                            ),
+                            CupertinoSwitch(
+                              value: autoMode,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  autoMode = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -314,17 +363,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   if (snapshot.hasData) {
                     List<ChartData> chartData = <ChartData>[];
+                    List<String> modeData = [];
                     Map<dynamic, dynamic> map = snapshot.data.snapshot.value;
                     map.forEach((dynamic, v) {
-                      ChartData thresData = ChartData(
-                          xValue: Timestamp.fromDate(DateTime.now()),
-                          yValue: threshold);
+                      ChartData thresData =
+                          ChartData(xValue: Timestamp.now(), yValue: threshold);
                       thresholdVisual.add(thresData);
 
                       ChartData dataItem = ChartData.fromMap(v);
-
-                      if (dataItem.mode != null) {
-                        newPageIndex = modeToIndexMap[dataItem.mode];
+                      modeData.add(dataItem.mode);
+                      if (modeData.last != null) {
+                        newPageIndex = modeToIndexMap[modeData.last];
                       }
                       chartData.add(dataItem);
 
@@ -398,8 +447,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 animationDuration: 0,
                                 color: Colors.tealAccent,
                                 dataSource: thresholdVisual,
-                                xValueMapper: (ChartData data, _) =>
-                                    data.xValue,
+                                xValueMapper: (ChartData data, _) {
+                                  return data.xValue;
+                                },
                                 yValueMapper: (ChartData data, _) =>
                                     data.yValue),
                           ],

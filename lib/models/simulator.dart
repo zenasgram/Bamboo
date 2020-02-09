@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-import 'package:bamboo/constants.dart';
-
 import 'dart:math';
 import 'dart:convert';
 
@@ -27,8 +25,9 @@ class Simulator {
 
   void simulateSensor() {
     var rng = new Random();
-    int index = rng.nextInt(3);
-    writeData(rng.nextInt(2100), Timestamp.now(), modeDict[index]);
+    int index = rng.nextInt(4);
+//    int index = 3;
+    writeData(rng.nextInt(2100), Timestamp.now(), modeDictSim[index]);
   }
 
   void backFlexData(String pt) {
@@ -44,3 +43,5 @@ class Simulator {
     }
   }
 }
+
+List<String> modeDictSim = ['Home', 'Music', 'Sports', 'Sleep'];

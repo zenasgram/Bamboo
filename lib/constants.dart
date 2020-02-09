@@ -185,9 +185,9 @@ Map<String, int> thresholdMap = {
 };
 
 Map<String, int> sensitivityMap = {
-  'Home': 15,
-  'Music': 3,
-  'Sports': 9,
+  'Home': 20,
+  'Music': 6,
+  'Sports': 15,
   'Sleep': 30,
 };
 
