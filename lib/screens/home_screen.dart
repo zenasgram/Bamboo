@@ -396,7 +396,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ChartData dataItem = ChartData.fromMap(v);
 
                       if (dataItem.xValue.toDate().millisecondsSinceEpoch !=
-                          trackingTime) {
+                              trackingTime &&
+                          dataItem.yValue != 0) {
                         chartData.add(
                             dataItem); //add to ChartData only when change is detected!
                       }
@@ -409,6 +410,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       dataItem = null;
 
                       if (chartData.length > 61) {
+                        // for frequency of transmission
                         chartData
                             .removeAt(0); //clip array for memory management
                       }
@@ -452,9 +454,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     begin: Alignment.topRight,
                                     end: Alignment.bottomLeft,
                                     stops: [
-                                      0.1,
-                                      0.4,
-                                      0.7,
+                                      0.2,
+                                      0.5,
+                                      0.6,
                                     ],
                                     colors: [
                                       Colors.teal[200],
@@ -481,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     data.yValue),
                             AreaSeries<ChartData, dynamic>(
                                 animationDuration: 0,
-                                opacity: 0.5,
+                                opacity: 0.2,
                                 color: Colors.tealAccent,
                                 dataSource: thresholdVisual,
                                 xValueMapper: (ChartData data, _) {

@@ -152,6 +152,8 @@ int trackingTime = 0;
 
 String statusKey;
 
+int count = 0;
+
 void updateVariables(int xData, int yData, int timeThres, String mode) {
   if (xData > timeThres && yData != null) {
     statusKey = getThreshold(yData);
@@ -163,26 +165,21 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
 
     sensitivity = sensitivityMap[mode];
 
-    if (xData != trackingTime) {
+    if (xData != trackingTime && yData != 0) {
       trackingTime = xData;
       yDataList.add(yData); //yDataList for thresholding
-    }
-
-    if ((yDataList.length - sensitivity) > 0) {
-      int count = 0;
-
-      for (int i = (yDataList.length - 1);
-          i > (yDataList.length - 2 - sensitivity);
-          i--) {
-        if (yDataList[i] > newThres) {
-          count++;
-          print(count);
-        }
+      print(yData);
+      if (yData > newThres) {
+        count++;
+      } else {
+        count = 0;
       }
       if (count == sensitivity) {
         warningStatus = true;
+        count = 0;
       }
     }
+
     if (yDataList.length > 15) {
       yDataList.removeAt(0); //clip array for memory management
     }
