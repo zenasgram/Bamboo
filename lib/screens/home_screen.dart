@@ -43,6 +43,10 @@ class _HomeScreenState extends State<HomeScreen> {
       if (pt != null) {
         sim.backFlexData(pt);
       }
+      if (newPageIndex != pageIndex) {
+        pageIndex = newPageIndex;
+        _onItemTapped(pageIndex);
+      }
     });
 
     //Screen Refresh Rate (Should be faster than sensor rate)
@@ -54,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
             (context) {
               return SafeArea(
                 child: Card(
+                  elevation: 10,
                   color: Colors.white,
                   margin: const EdgeInsets.only(left: 4, right: 4),
                   child: ListTile(
@@ -65,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     title: Padding(
-                      padding: const EdgeInsets.only(left: 8.0, top: 15),
+                      padding: const EdgeInsets.only(left: 8.0, top: 10),
                       child: Text(
                         'Bamboo Alert',
                         style: GoogleFonts.montserrat(
@@ -78,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     subtitle: Padding(
-                      padding: const EdgeInsets.only(left: 8.0, bottom: 15),
+                      padding: const EdgeInsets.only(left: 8.0, bottom: 10),
                       child: Text(
                         'Check your posture. Remember, don\'t just do it. Bamboo it.',
                         style: GoogleFonts.montserrat(
@@ -175,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      pageIndex = index;
       modeTitle = modeDict[index];
 
       if (index == 0) {
@@ -185,9 +190,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  List<String> modeDict = ['Home', 'Music', 'Sports', 'Sleep'];
+  int pageIndex = 0;
+  int newPageIndex = 0;
 
-  int _selectedIndex = 0;
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
@@ -317,6 +322,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       thresholdVisual.add(thresData);
 
                       ChartData dataItem = ChartData.fromMap(v);
+
+                      if (dataItem.mode != null) {
+                        newPageIndex = modeToIndexMap[dataItem.mode];
+                      }
                       chartData.add(dataItem);
 
                       return chartData
@@ -514,7 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: Text('Sleep'),
             ),
           ],
-          currentIndex: _selectedIndex,
+          currentIndex: pageIndex,
           selectedItemColor: Colors.amber[800],
           onTap: _onItemTapped,
         ),
@@ -526,11 +535,13 @@ class _HomeScreenState extends State<HomeScreen> {
 DateFormat inputFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
 
 class ChartData {
-  ChartData({this.xValue, this.yValue});
+  ChartData({this.xValue, this.yValue, this.mode});
 
   ChartData.fromMap(Map<dynamic, dynamic> dataMap)
       : xValue = Timestamp.fromDate(inputFormat.parse(dataMap['time'])),
-        yValue = dataMap['value'];
+        yValue = dataMap['value'],
+        mode = dataMap['mode'];
   final Timestamp xValue;
   final int yValue;
+  final String mode;
 }

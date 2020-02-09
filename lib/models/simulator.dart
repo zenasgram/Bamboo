@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 
+import 'package:bamboo/constants.dart';
+
 import 'dart:math';
 import 'dart:convert';
 
@@ -9,10 +11,11 @@ var keepTrack;
 class Simulator {
   final fireRTDataSim = FirebaseDatabase.instance.reference().child("flex");
 
-  void writeData(int value, Timestamp time) {
+  void writeData(int value, Timestamp time, String mode) {
     fireRTDataSim.push().set({
       "value": value,
       "time": time.toDate().toString(),
+      "mode": mode,
     });
   }
 
@@ -24,7 +27,8 @@ class Simulator {
 
   void simulateSensor() {
     var rng = new Random();
-    writeData(rng.nextInt(2100), Timestamp.now());
+    int index = rng.nextInt(3);
+    writeData(rng.nextInt(2100), Timestamp.now(), modeDict[index]);
   }
 
   void backFlexData(String pt) {

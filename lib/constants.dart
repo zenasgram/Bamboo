@@ -140,7 +140,7 @@ Map<String, String> adviceMap = {
 };
 
 List<int> yDataList = [];
-int sensitivity = 5;
+int sensitivity = 15;
 
 bool warningStatus = false;
 bool alreadySet = false;
@@ -153,6 +153,8 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
     statusBend = statusKey;
     statusAdvice = adviceMap[statusKey];
     threshold = thresholdMap[mode];
+
+    sensitivity = sensitivityMap[mode];
 
     yDataList.add(yData); //yDataList for thresholding
 
@@ -181,3 +183,19 @@ Map<String, int> thresholdMap = {
   'Sports': 1000,
   'Sleep': 1500,
 };
+
+Map<String, int> sensitivityMap = {
+  'Home': 15,
+  'Music': 3,
+  'Sports': 9,
+  'Sleep': 30,
+};
+
+Map<String, int> modeToIndexMap = {
+  'Home': 0,
+  'Music': 1,
+  'Sports': 2,
+  'Sleep': 3,
+};
+
+List<String> modeDict = ['Home', 'Music', 'Sports', 'Sleep'];
