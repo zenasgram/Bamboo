@@ -150,9 +150,11 @@ bool alreadySet = false;
 
 int trackingTime = 0;
 
+String statusKey;
+
 void updateVariables(int xData, int yData, int timeThres, String mode) {
   if (xData > timeThres && yData != null) {
-    String statusKey = getThreshold(yData);
+    statusKey = getThreshold(yData);
     selector = bendThresholdMap[statusKey];
 
     statusBend = statusKey;
@@ -170,10 +172,11 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
       int count = 0;
 
       for (int i = (yDataList.length - 1);
-          i > (yDataList.length - sensitivity - 1);
+          i > (yDataList.length - 2 - sensitivity);
           i--) {
         if (yDataList[i] > newThres) {
           count++;
+          print(count);
         }
       }
       if (count == sensitivity) {

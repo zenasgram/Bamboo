@@ -44,6 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
     thresholdVisual.add(thresDataInitStart);
     thresholdVisual.add(thresDataInitEnd);
 
+    thresDataInitStart = null;
+    thresDataInitEnd = null;
+
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
     Timer.periodic(Duration(seconds: 2), (timer) {
@@ -370,18 +373,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         thresholdVisual.add(newThresDataStart);
                         thresholdVisual.add(newThresDataEnd);
+
                         threshold = newThres;
+
+                        newThresDataStart = null;
+                        newThresDataEnd = null;
                       }
                       //updates the threshold line as time increases
                       ChartData thresData =
                           ChartData(xValue: Timestamp.now(), yValue: threshold);
                       thresholdVisual.removeLast();
                       thresholdVisual.add(thresData);
+                      thresData = null;
 
                       if (chartData.length == 0) {
                         ChartData nullHandler =
                             ChartData(xValue: Timestamp.now(), yValue: 0);
                         chartData.add(nullHandler);
+                        nullHandler = null;
                       }
 
                       ChartData dataItem = ChartData.fromMap(v);
@@ -397,6 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         newPageIndex = modeToIndexMap[modeData.last];
                       }
                       modeData.clear();
+                      dataItem = null;
 
                       if (chartData.length > 61) {
                         chartData
@@ -417,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             intervalType: DateTimeIntervalType.minutes,
                             interval: 1,
                             maximum:
-                                DateTime.now().subtract(Duration(seconds: 5)),
+                                DateTime.now().subtract(Duration(seconds: 2)),
                             minimum:
                                 DateTime.now().subtract(Duration(minutes: 1)),
                           ),
@@ -438,7 +448,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           series: <ChartSeries<ChartData, dynamic>>[
                             SplineAreaSeries<ChartData, dynamic>(
                                 animationDuration: 0,
-                                color: Colors.tealAccent,
                                 gradient: LinearGradient(
                                     begin: Alignment.topRight,
                                     end: Alignment.bottomLeft,
@@ -472,7 +481,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     data.yValue),
                             AreaSeries<ChartData, dynamic>(
                                 animationDuration: 0,
-                                opacity: 0.3,
+                                opacity: 0.5,
                                 color: Colors.tealAccent,
                                 dataSource: thresholdVisual,
                                 xValueMapper: (ChartData data, _) {

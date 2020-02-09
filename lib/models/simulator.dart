@@ -28,6 +28,9 @@ class Simulator {
     int index = rng.nextInt(4);
 //    int index = 3;
     writeData(rng.nextInt(2100), Timestamp.now(), modeDictSim[index]);
+
+    index = null;
+    rng = null;
   }
 
   void backFlexData(String pt) {
@@ -41,6 +44,7 @@ class Simulator {
     if (currentLast != keepTrack) {
       keepTrack = currentLast;
     }
+    currentLast = null;
   }
 }
 
