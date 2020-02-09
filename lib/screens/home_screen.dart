@@ -290,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         SizedBox(
-                          height: 20,
+                          height: 25,
                         ),
                         IconButton(
                             icon: Icon(FontAwesomeIcons.signOutAlt),
@@ -306,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Auto',
                               style: GoogleFonts.montserrat(
                                 textStyle: Theme.of(context).textTheme.display1,
-                                fontSize: 20,
+                                fontSize: 19,
                                 fontWeight: FontWeight.w400,
                                 fontStyle: FontStyle.normal,
                               ),
