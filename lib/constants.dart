@@ -157,6 +157,7 @@ int count = 0;
 void updateVariables(int xData, int yData, int timeThres, String mode) {
   if (xData > timeThres && yData != null) {
     statusKey = getThreshold(yData);
+    print(yData);
     selector = bendThresholdMap[statusKey];
 
     statusBend = statusKey;
@@ -168,7 +169,7 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
     if (xData != trackingTime && yData != 0) {
       trackingTime = xData;
       yDataList.add(yData); //yDataList for thresholding
-      print(yData);
+
       if (yData > newThres) {
         count++;
       } else {

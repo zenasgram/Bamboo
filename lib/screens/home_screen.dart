@@ -466,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 opacity: 0.8,
                                 dataSource: chartData,
                                 xValueMapper: (ChartData data, _) {
-                                  if (data.yValue != null) {
+                                  if (data.yValue != null && data.yValue != 0) {
                                     updateVariables(
                                         data.xValue
                                             .toDate()
