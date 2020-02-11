@@ -468,7 +468,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     modeData.add(data.mode);
 
                                     if (modeData.last != null) {
-                                      print(modeData);
                                       newPageIndex =
                                           modeToIndexMap[modeData.last];
                                     }
