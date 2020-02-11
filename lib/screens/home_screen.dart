@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
-    Timer.periodic(Duration(seconds: 2), (timer) {
+    Timer.periodic(Duration(seconds: 1), (timer) {
 //      sim.simulateSensor();
       if (pt != null) {
         sim.backFlexData(pt);
@@ -395,16 +395,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             dataItem); //add to ChartData only when change is detected!
                       }
 
-                      modeData.add(dataItem.mode);
-
-                      if (modeData.last != null &&
-                          modeData.last != modeDict[pageIndex]) {
-//                        print(modeData);
-                        newPageIndex = modeToIndexMap[modeData.last];
-                      }
-
-                      modeData.clear();
-
                       if (chartData.length > 120) {
                         // for frequency of transmission
                         print(
@@ -474,6 +464,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                             .subtract(Duration(seconds: 2))
                                             .millisecondsSinceEpoch,
                                         modeTitle);
+
+                                    modeData.add(data.mode);
+
+                                    if (modeData.last != null) {
+                                      print(modeData);
+                                      newPageIndex =
+                                          modeToIndexMap[modeData.last];
+                                    }
+
+                                    if (modeData.length > 0) {
+                                      modeData.removeAt(
+                                          0); //clip array for memory management
+                                    }
                                   }
                                   return data.xValue;
                                 },
