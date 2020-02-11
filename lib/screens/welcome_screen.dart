@@ -32,7 +32,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
     controller.addListener(() {
       setState(() {});
-//      print(animation.value);
     });
   }
 
@@ -62,9 +61,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     height: animation.value * 70,
                   ),
                 ),
-//                SizedBox(
-//                  width: 20,
-//                ),
                 TyperAnimatedTextKit(
                   text: ['Bamboo', 'Posture', 'Tracker'],
                   textStyle: GoogleFonts.montserrat(

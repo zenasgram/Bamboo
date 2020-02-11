@@ -25,9 +25,16 @@ import 'package:mqtt_client/mqtt_client.dart';
 
 String pt;
 
-int listenDuration = 1200000; //in seconds
+int keepAlivePeriod = 20;
 
-Future<int> mqttListener(MqttClient client) async {
+int listenDuration = 1000000; //in seconds
+
+//-----------------------------------------------------------
+//MQTT Client
+final MqttClient client = MqttClient.withPort('test.mosquitto.org', '#', 1883);
+// -----------------------------------------------------------
+
+Future<int> mqttListener() async {
   /// A websocket URL must start with ws:// or wss:// or Dart will throw an exception, consult your websocket MQTT broker
   /// for details.
   /// To use websockets add the following lines -:
@@ -44,7 +51,7 @@ Future<int> mqttListener(MqttClient client) async {
 
   /// If you intend to use a keep alive value in your connect message that is not the default(60s)
   /// you must set it here
-  client.keepAlivePeriod = 20;
+  client.keepAlivePeriod = keepAlivePeriod;
 
   /// Add the unsolicited disconnection callback
   client.onDisconnected = onDisconnected;
@@ -68,11 +75,13 @@ Future<int> mqttListener(MqttClient client) async {
   /// and clean session, an example of a specific one below.
   final MqttConnectMessage connMess = MqttConnectMessage()
       .withClientIdentifier('Mqtt_MyClientUniqueId')
-      .keepAliveFor(20) // Must agree with the keep alive set above or not set
+      .keepAliveFor(
+          keepAlivePeriod) // Must agree with the keep alive set above or not set
       .withWillTopic('willtopic') // If you set this you must set a will message
       .withWillMessage('My Will message')
       .startClean() // Non persistent session for testing
       .withWillQos(MqttQos.atLeastOnce);
+
   print('EXAMPLE::Mosquitto client connecting....');
   client.connectionMessage = connMess;
 
@@ -96,6 +105,11 @@ Future<int> mqttListener(MqttClient client) async {
     client.disconnect();
     exit(-1);
   }
+//
+//  /// Ok, lets try a subscription
+//  print('EXAMPLE::Subscribing to the test/lol topic');
+//  const String topic = 'test/lol'; // Not a wildcard topic
+//  client.subscribe(topic, MqttQos.atMostOnce);
 
   /// Ok, lets try a subscription
   print('EXAMPLE::Subscribing to the IC.embedded/Faraday topic');
@@ -105,8 +119,8 @@ Future<int> mqttListener(MqttClient client) async {
   /// The client has a change notifier object(see the Observable class) which we then listen to to get
   /// notifications of published updates to each subscribed topic.
 
-  client.updates.listen((List<MqttReceivedMessage<MqttMessage>> c) {
-    final MqttPublishMessage recMess = c[0].payload;
+  client.updates.listen((List<MqttReceivedMessage<MqttMessage>> event) {
+    final MqttPublishMessage recMess = event[0].payload;
     pt = MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
     /// The above may seem a little convoluted for users only interested in the
@@ -115,7 +129,7 @@ Future<int> mqttListener(MqttClient client) async {
     /// for a while.
     /// The payload is a byte buffer, this will be specific to the topic
     print(
-        'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+        'EXAMPLE::Change notification:: topic is <${event[0].topic}>, payload is <-- $pt -->');
     print('');
   });
 
@@ -169,7 +183,7 @@ void onDisconnected() {
 //  if (client.connectionStatus.returnCode == MqttConnectReturnCode.solicited) {
 //    print('EXAMPLE::OnDisconnected callback is solicited, this is correct');
 //  }
-  exit(-1);
+//  exit(-1);
 }
 
 /// The successful connect callback

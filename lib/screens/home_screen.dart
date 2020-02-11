@@ -34,9 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
+    mqttListener(); //runs the mqtt Script
+
     ChartData thresDataInitStart = ChartData(
         xValue:
-            Timestamp.fromDate(DateTime.now().subtract(Duration(seconds: 60))),
+            Timestamp.fromDate(DateTime.now().subtract(Duration(seconds: 62))),
         yValue: threshold);
     ChartData thresDataInitEnd =
         ChartData(xValue: Timestamp.now(), yValue: threshold);
@@ -50,14 +52,14 @@ class _HomeScreenState extends State<HomeScreen> {
     //on start up, trigger sensor simulation
     Simulator sim = Simulator();
     Timer.periodic(Duration(seconds: 2), (timer) {
-      sim.simulateSensor();
+//      sim.simulateSensor();
       if (pt != null) {
         sim.backFlexData(pt);
       }
     });
 
     //Screen Refresh Rate (Should be faster than sensor rate)
-    Timer.periodic(Duration(milliseconds: 100), (timer) {
+    Timer.periodic(Duration(milliseconds: 500), (timer) {
       setState(() {
         //automode selector
         if (autoMode == true) {
@@ -130,13 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     });
 
-    //-----------------------------------------------------------
-    //MQTT Client
-//    final MqttClient client =
-//        MqttClient.withPort('test.mosquitto.org', '#', 1883);
-//    mqttListener(client); //runs the mqtt Script
-    //-----------------------------------------------------------
-
     getCurrentUser();
   }
 
@@ -146,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
       .reference()
       .child("flex")
       .orderByChild('time')
-      .limitToLast(31);
+      .limitToLast(62);
 
   //Cloud firestore instance (For user registration)
   final _auth = FirebaseAuth.instance;
@@ -181,6 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
+      print(index);
       pageIndex = index;
       modeTitle = modeDict[index];
       autoMode = false;
@@ -366,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         thresholdVisual.clear();
                         ChartData newThresDataStart = ChartData(
                             xValue: Timestamp.fromDate(
-                                DateTime.now().subtract(Duration(seconds: 60))),
+                                DateTime.now().subtract(Duration(seconds: 65))),
                             yValue: newThres);
                         ChartData newThresDataEnd = ChartData(
                             xValue: Timestamp.now(), yValue: newThres);
@@ -386,31 +382,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       thresholdVisual.add(thresData);
                       thresData = null;
 
-                      if (chartData.length == 0) {
-                        ChartData nullHandler =
-                            ChartData(xValue: Timestamp.now(), yValue: 0);
-                        chartData.add(nullHandler);
-                        nullHandler = null;
-                      }
-
                       ChartData dataItem = ChartData.fromMap(v);
 
-                      if (dataItem.xValue.toDate().millisecondsSinceEpoch !=
+                      if (dataItem != null &&
+                          dataItem.xValue.toDate().millisecondsSinceEpoch !=
                               trackingTime &&
-                          dataItem.yValue != 0) {
+                          dataItem.xValue != null &&
+                          dataItem.yValue != trackingValue &&
+                          dataItem.yValue != 0 &&
+                          dataItem.yValue != null) {
                         chartData.add(
                             dataItem); //add to ChartData only when change is detected!
                       }
 
                       modeData.add(dataItem.mode);
-                      if (modeData.last != null) {
+
+                      if (modeData.last != null &&
+                          modeData.last != modeDict[pageIndex]) {
+//                        print(modeData);
                         newPageIndex = modeToIndexMap[modeData.last];
                       }
-                      modeData.clear();
-                      dataItem = null;
 
-                      if (chartData.length > 61) {
+                      modeData.clear();
+
+                      if (chartData.length > 120) {
                         // for frequency of transmission
+                        print(
+                            "clipping the chartdata for app memory management");
                         chartData
                             .removeAt(0); //clip array for memory management
                       }
@@ -431,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             maximum:
                                 DateTime.now().subtract(Duration(seconds: 2)),
                             minimum:
-                                DateTime.now().subtract(Duration(minutes: 1)),
+                                DateTime.now().subtract(Duration(seconds: 62)),
                           ),
                           primaryYAxis: NumericAxis(
                             isVisible: true,

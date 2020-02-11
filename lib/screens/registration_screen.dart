@@ -3,7 +3,6 @@ import 'package:bamboo/components/rounded_button.dart';
 import 'package:bamboo/constants.dart';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';

@@ -141,14 +141,15 @@ Map<String, String> adviceMap = {
 };
 
 List<int> yDataList = [];
-int threshold = 1300;
-int newThres = 1300;
-int sensitivity = 15;
+int threshold = 1200;
+int newThres = 1200;
+int sensitivity = 9;
 
 bool warningStatus = false;
 bool alreadySet = false;
 
 int trackingTime = 0;
+int trackingValue = 0;
 
 String statusKey;
 
@@ -166,8 +167,9 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
 
     sensitivity = sensitivityMap[mode];
 
-    if (xData != trackingTime && yData != 0) {
+    if (xData != trackingTime && yData != 0 && yData != trackingValue) {
       trackingTime = xData;
+      trackingValue = yData;
       yDataList.add(yData); //yDataList for thresholding
 
       if (yData > newThres) {
@@ -181,16 +183,16 @@ void updateVariables(int xData, int yData, int timeThres, String mode) {
       }
     }
 
-    if (yDataList.length > 15) {
+    if (yDataList.length > 30) {
       yDataList.removeAt(0); //clip array for memory management
     }
   }
 }
 
 Map<String, int> thresholdMap = {
-  'Home': 1300,
+  'Home': 1200,
   'Music': 400,
-  'Sports': 1000,
+  'Sports': 800,
   'Sleep': 1500,
 };
 
